@@ -189,8 +189,16 @@ jobs:
           make-target: 'hotspot ${{ inputs.make-arguments }}'
           platform: linux-${{ matrix.target-cpu }}
         if: steps.create-sysroot.outcome == 'success' || steps.get-cached-sysroot.outputs.cache-hit == 'true'
+      
       - name: 'Upload bundles'
         uses: ./.github/actions/upload-bundles
         with:
-          platform: ${{ matrix.target-cpu }}
+          platform: linux-${{ matrix.target-cpu }}
           debug-suffix: ''
+
+      - name: 'test'
+        uses: ./.github/workflows/test.yml
+        with:
+          platform: linux-${{ matrix.target-cpu }}
+          bootjdk-platform: linux-${{ matrix.target-cpu }}
+          runs-on: ubuntu-22.04
