@@ -195,3 +195,18 @@ jobs:
         with:
           platform: linux-${{ matrix.target-cpu }}
           debug-suffix: ''
+
+      - name: 'zip build result'
+        id: zip
+        run: |
+            mkdir results
+            cd build
+            zip -r -9 "$GITHUB_WORKSPACE/results/linux-${{ matrix.target-cpu }}.zip" .
+            cd $GITHUB_WORKSPACE
+          
+      - name: 'Upload test results'
+        uses: actions/upload-artifact@v4
+        with:
+          path: results
+          name: linux-${{ matrix.target-cpu }}.zip
+        if: always()
