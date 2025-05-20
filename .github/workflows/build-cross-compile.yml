@@ -61,8 +61,6 @@ jobs:
             gnu-abi: eabihf
 
     steps:
-
-
         # Upgrading apt to solve libc6 installation bugs, see JDK-8260460.
       - name: 'Install toolchain and dependencies'
         run: |
@@ -76,7 +74,7 @@ jobs:
               g++-${{ inputs.gcc-major-version }}-${{ matrix.gnu-arch }}-linux-gnu${{ matrix.gnu-abi}} \
               libxrandr-dev libxtst-dev libcups2-dev libasound2-dev
           sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-${{ inputs.gcc-major-version }} 100 --slave /usr/bin/g++ g++ /usr/bin/g++-${{ inputs.gcc-major-version }}
-          find /usr -d -name X11 
+          find /usr -name Xlib.h 
 
       - name: Update library cache
         run: |
@@ -152,12 +150,10 @@ jobs:
           --with-gtest=${{ steps.gtest.outputs.path }}
           --with-zlib=bundled
           --disable-precompiled-headers
+          --enable-debug
           --enable-cds
           --openjdk-target=${{ matrix.gnu-arch }}-linux-gnu${{ matrix.gnu-abi}}
           --with-sysroot=sysroot
-          --x-includes=/usr/include/X11 \
-          --x-libraries=/usr/lib/x86_64-linux-gnu
-
           CC=${{ matrix.gnu-arch }}-linux-gnu${{ matrix.gnu-abi}}-gcc-${{ inputs.gcc-major-version }}
           CXX=${{ matrix.gnu-arch }}-linux-gnu${{ matrix.gnu-abi}}-g++-${{ inputs.gcc-major-version }}
           ${{ inputs.extra-conf-options }} ${{ inputs.configure-arguments }} || (
@@ -165,8 +161,6 @@ jobs:
           cat config.log &&
           exit 1)
         if: steps.create-sysroot.outcome == 'success' || steps.get-cached-sysroot.outputs.cache-hit == 'true'
-
-
 
 
       - name: 'Build'
