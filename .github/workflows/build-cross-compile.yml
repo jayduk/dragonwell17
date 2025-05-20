@@ -160,9 +160,15 @@ jobs:
         id: build
         uses: ./.github/actions/do-build
         with:
-          make-target: 'images ${{ inputs.make-arguments }}'
+          make-target: 'product-bundles ${{ inputs.make-arguments }}'
           platform: linux-${{ matrix.target-cpu }}
         if: steps.create-sysroot.outcome == 'success' || steps.get-cached-sysroot.outputs.cache-hit == 'true'
+
+      - name: 'Upload bundles'
+        uses: ./.github/actions/upload-bundles
+        with:
+          platform: upload-bundles-linux-${{ matrix.target-cpu }}
+          debug-suffix: ''
 
       - name: 'log info'
         id: zip
@@ -175,3 +181,4 @@ jobs:
           path: build
           name: linux-${{ matrix.target-cpu }}.zip
         if: always()
+
