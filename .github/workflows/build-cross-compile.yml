@@ -61,18 +61,9 @@ jobs:
             gnu-abi: eabihf
 
     steps:
-      - name: 'Checkout the JDK source'
-        uses: actions/checkout@v4
-
-      - name: 'Get the BootJDK'
-        id: bootjdk
-        uses: ./.github/actions/get-bootjdk
-        with:
-          platform: linux-x64
-
-      - name: 'Get GTest'
-        id: gtest
-        uses: ./.github/actions/get-gtest
+      - name: Verify zlib.h location
+        run: |
+          find /usr -name zlib.h 2>/dev/null
 
         # Upgrading apt to solve libc6 installation bugs, see JDK-8260460.
       - name: 'Install toolchain and dependencies'
@@ -86,8 +77,40 @@ jobs:
               gcc-${{ inputs.gcc-major-version }}-${{ matrix.gnu-arch }}-linux-gnu${{ matrix.gnu-abi}} \
               g++-${{ inputs.gcc-major-version }}-${{ matrix.gnu-arch }}-linux-gnu${{ matrix.gnu-abi}} \
               libxrandr-dev libxtst-dev libcups2-dev libasound2-dev
-          sudo apt-get install -y zlib1g-dev
           sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-${{ inputs.gcc-major-version }} 100 --slave /usr/bin/g++ g++ /usr/bin/g++-${{ inputs.gcc-major-version }}
+
+      - name: Download and compile zlib
+        env:
+          CC: ${{ matrix.gnu-arch }}-linux-gnu${{ matrix.gnu-abi }}-gcc-${{ inputs.gcc-major-version }}
+          CXX: ${{ matrix.gnu-arch }}-linux-gnu${{ matrix.gnu-abi }}-g++-${{ inputs.gcc-major-version }}
+        run: |
+          # 验证编译器路径
+          which $CC
+          which $CXX
+
+          wget https://zlib.net/zlib-1.2.13.tar.gz
+          tar -xzf zlib-1.2.13.tar.gz
+          cd zlib-1.2.13
+          ./configure --prefix=/usr/local
+          make
+          sudo make install
+  
+      - name: Update library cache
+        run: |
+          sudo ldconfig
+
+      - name: 'Checkout the JDK source'
+        uses: actions/checkout@v4
+
+      - name: 'Get the BootJDK'
+        id: bootjdk
+        uses: ./.github/actions/get-bootjdk
+        with:
+          platform: linux-x64
+
+      - name: 'Get GTest'
+        id: gtest
+        uses: ./.github/actions/get-gtest
 
       - name: 'Check cache for sysroot'
         id: get-cached-sysroot
