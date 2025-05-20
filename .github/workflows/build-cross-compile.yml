@@ -160,7 +160,6 @@ jobs:
 
 
       - name: 'build zlib'
-        -id: zlib
         run: |
           sudo mkdir zlib_base
           sudo cd zlib_base
