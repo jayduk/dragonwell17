@@ -61,6 +61,18 @@ jobs:
             gnu-abi: eabihf
 
     steps:
+      - name: 'build zlib'
+        run: |
+          sudo mkdir zlib_base
+          sudo cd zlib_base
+          sudo wget http://prodownloads.sourceforge.net/libpng/zlib-1.2.11.tar.gz
+          sudo tar -zxvf zlib-1.2.11.tar.gz
+          sudo cd zlib-1.2.11
+          sudo ./configure --prefix=/usr/local CC=${{ matrix.gnu-arch }}-linux-gnu${{ matrix.gnu-abi}}-gcc-${{ inputs.gcc-major-version }} CXX=${{ matrix.gnu-arch }}-linux-gnu${{ matrix.gnu-abi}}-g++-${{ inputs.gcc-major-version }}
+          sudo make 
+          sudo make install
+          sudo cd ../../..
+          
       - name: 'Checkout the JDK source'
         uses: actions/checkout@v4
 
@@ -159,17 +171,7 @@ jobs:
         if: steps.create-sysroot.outcome == 'success' || steps.get-cached-sysroot.outputs.cache-hit == 'true'
 
 
-      - name: 'build zlib'
-        run: |
-          sudo mkdir zlib_base
-          sudo cd zlib_base
-          sudo wget http://prodownloads.sourceforge.net/libpng/zlib-1.2.11.tar.gz
-          sudo tar -zxvf zlib-1.2.11.tar.gz
-          sudo cd zlib-1.2.11
-          sudo ./configure --prefix=/usr/local CC=${{ matrix.gnu-arch }}-linux-gnu${{ matrix.gnu-abi}}-gcc-${{ inputs.gcc-major-version }} CXX=${{ matrix.gnu-arch }}-linux-gnu${{ matrix.gnu-abi}}-g++-${{ inputs.gcc-major-version }}
-          sudo make 
-          sudo make install
-          sudo cd ../../..
+
 
       - name: 'Build'
         id: build
