@@ -144,7 +144,7 @@ jobs:
           --with-version-opt=${GITHUB_ACTOR}-${GITHUB_SHA}
           --with-boot-jdk=${{ steps.bootjdk.outputs.path }}
           --with-gtest=${{ steps.gtest.outputs.path }}
-          --with-zlib=system
+          --with-zlib=/usr/local
           --enable-debug
           --disable-precompiled-headers
           --enable-cds
@@ -157,6 +157,20 @@ jobs:
           cat config.log &&
           exit 1)
         if: steps.create-sysroot.outcome == 'success' || steps.get-cached-sysroot.outputs.cache-hit == 'true'
+
+
+      - name: 'build zlib'
+        -id: zlib
+        run: |
+          sudo mkdir zlib_base
+          sudo cd zlib_base
+          sudo wget http://prodownloads.sourceforge.net/libpng/zlib-1.2.11.tar.gz
+          sudo tar -zxvf zlib-1.2.11.tar.gz
+          sudo cd zlib-1.2.11
+          sudo ./configure --prefix=/usr/local CC=${{ matrix.gnu-arch }}-linux-gnu${{ matrix.gnu-abi}}-gcc-${{ inputs.gcc-major-version }} CXX=${{ matrix.gnu-arch }}-linux-gnu${{ matrix.gnu-abi}}-g++-${{ inputs.gcc-major-version }}
+          sudo make 
+          sudo make install
+          sudo cd ../../..
 
       - name: 'Build'
         id: build
