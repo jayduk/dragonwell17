@@ -136,7 +136,6 @@ jobs:
 
       - name: 'Configure'
         run: >
-          # --disable-precompiled-headers
           bash configure
           --with-conf-name=linux-${{ matrix.target-cpu }}
           --with-version-opt=${GITHUB_ACTOR}-${GITHUB_SHA}
@@ -144,6 +143,7 @@ jobs:
           --with-gtest=${{ steps.gtest.outputs.path }}
           --with-zlib=system
           --enable-debug
+          --disable-precompiled-headers
           --enable-cds
           --openjdk-target=${{ matrix.gnu-arch }}-linux-gnu${{ matrix.gnu-abi}}
           --with-sysroot=sysroot
