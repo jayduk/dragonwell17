@@ -162,7 +162,7 @@ jobs:
         id: build
         uses: ./.github/actions/do-build
         with:
-          make-target: 'images ${{ inputs.make-arguments }}'
+          make-target: 'jdk ${{ inputs.make-arguments }}'
           platform: linux-${{ matrix.target-cpu }}
         if: steps.create-sysroot.outcome == 'success' || steps.get-cached-sysroot.outputs.cache-hit == 'true'
 
