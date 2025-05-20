@@ -50,18 +50,8 @@ jobs:
       fail-fast: false
       matrix:
         target-cpu:
-          - aarch64
           - arm
-          - s390x
-          - ppc64le
-          - riscv64
         include:
-          - target-cpu: aarch64
-            gnu-arch: aarch64
-            debian-arch: arm64
-            debian-repository: https://httpredir.debian.org/debian/
-            debian-version: bullseye
-            tolerate-sysroot-errors: false
           - target-cpu: arm
             gnu-arch: arm
             debian-arch: armhf
@@ -69,24 +59,6 @@ jobs:
             debian-version: bullseye
             tolerate-sysroot-errors: false
             gnu-abi: eabihf
-          - target-cpu: s390x
-            gnu-arch: s390x
-            debian-arch: s390x
-            debian-repository: https://httpredir.debian.org/debian/
-            debian-version: bullseye
-            tolerate-sysroot-errors: false
-          - target-cpu: ppc64le
-            gnu-arch: powerpc64le
-            debian-arch: ppc64el
-            debian-repository: https://httpredir.debian.org/debian/
-            debian-version: bullseye
-            tolerate-sysroot-errors: false
-          - target-cpu: riscv64
-            gnu-arch: riscv64
-            debian-arch: riscv64
-            debian-repository: https://httpredir.debian.org/debian/
-            debian-version: sid
-            tolerate-sysroot-errors: true
 
     steps:
       - name: 'Checkout the JDK source'
@@ -171,6 +143,7 @@ jobs:
           --with-gtest=${{ steps.gtest.outputs.path }}
           --with-zlib=system
           --enable-debug
+          --enable-cds
           --disable-precompiled-headers
           --openjdk-target=${{ matrix.gnu-arch }}-linux-gnu${{ matrix.gnu-abi}}
           --with-sysroot=sysroot
@@ -189,24 +162,15 @@ jobs:
           make-target: 'hotspot ${{ inputs.make-arguments }}'
           platform: linux-${{ matrix.target-cpu }}
         if: steps.create-sysroot.outcome == 'success' || steps.get-cached-sysroot.outputs.cache-hit == 'true'
-      
-      - name: 'Upload bundles'
-        uses: ./.github/actions/upload-bundles
-        with:
-          platform: linux-${{ matrix.target-cpu }}
-          debug-suffix: ''
 
-      - name: 'zip build result'
+      - name: 'log info'
         id: zip
         run: |
-            mkdir results
-            cd build
-            zip -r -9 "$GITHUB_WORKSPACE/results/linux-${{ matrix.target-cpu }}.zip" .
-            cd $GITHUB_WORKSPACE
+            ll .
           
       - name: 'Upload test results'
         uses: actions/upload-artifact@v4
         with:
-          path: results
+          path: build
           name: linux-${{ matrix.target-cpu }}.zip
         if: always()

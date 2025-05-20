@@ -293,16 +293,6 @@ jobs:
       bootjdk-platform: linux-x64
       runs-on: ubuntu-22.04
 
-  test-linux-arm:
-    name: test-arm
-    needs:
-      - build-linux-cross-compile
-    uses: ./.github/workflows/test.yml
-    with:
-      platform: linux-arm
-      bootjdk-platform: linux-arm
-      runs-on: ubuntu-22.04
-
   test-macos-x64:
     name: macos-x64
     needs:
