@@ -76,11 +76,9 @@ jobs:
               g++-${{ inputs.gcc-major-version }}-${{ matrix.gnu-arch }}-linux-gnu${{ matrix.gnu-abi}} \
               libxrandr-dev libxtst-dev libcups2-dev libasound2-dev
           sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-${{ inputs.gcc-major-version }} 100 --slave /usr/bin/g++ g++ /usr/bin/g++-${{ inputs.gcc-major-version }}
-          echo find in usr
-          ls /usr | grep X11
-          echo find in usr/local
-          ls /usr/local | grep X11
-      - name: Update library cache
+          find /usr -d -name X11 
+
+          - name: Update library cache
         run: |
           sudo ldconfig
 
