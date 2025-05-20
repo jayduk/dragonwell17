@@ -78,7 +78,7 @@ jobs:
           sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-${{ inputs.gcc-major-version }} 100 --slave /usr/bin/g++ g++ /usr/bin/g++-${{ inputs.gcc-major-version }}
           find /usr -d -name X11 
 
-          - name: Update library cache
+      - name: Update library cache
         run: |
           sudo ldconfig
 
