@@ -160,7 +160,7 @@ jobs:
         id: build
         uses: ./.github/actions/do-build
         with:
-          make-target: 'hotspot ${{ inputs.make-arguments }}'
+          make-target: 'images ${{ inputs.make-arguments }}'
           platform: linux-${{ matrix.target-cpu }}
         if: steps.create-sysroot.outcome == 'success' || steps.get-cached-sysroot.outputs.cache-hit == 'true'
 
