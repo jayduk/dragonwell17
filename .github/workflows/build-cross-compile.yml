@@ -160,6 +160,9 @@ jobs:
           --enable-cds
           --openjdk-target=${{ matrix.gnu-arch }}-linux-gnu${{ matrix.gnu-abi}}
           --with-sysroot=sysroot
+          --with-extra-cflags="--sysroot=$(pwd)/sysroot -I$(pwd)/sysroot/usr/include -I$(pwd)/sysroot/usr/include"
+          --with-extra-cxxflags="--sysroot=$(pwd)/sysroot -I$(pwd)/sysroot/usr/include -I$(pwd)/sysroot/usr/include"
+
           CC=${{ matrix.gnu-arch }}-linux-gnu${{ matrix.gnu-abi}}-gcc-${{ inputs.gcc-major-version }}
           CXX=${{ matrix.gnu-arch }}-linux-gnu${{ matrix.gnu-abi}}-g++-${{ inputs.gcc-major-version }}
           ${{ inputs.extra-conf-options }} ${{ inputs.configure-arguments }} || (
