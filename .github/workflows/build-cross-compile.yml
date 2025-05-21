@@ -74,16 +74,8 @@ jobs:
         id: gtest
         uses: ./.github/actions/get-gtest
 
-      - name: 'Check cache for sysroot'
-        id: get-cached-sysroot
-        uses: actions/cache@v4
-        with:
-          path: sysroot
-          key: sysroot-${{ matrix.debian-arch }}-${{ hashFiles('./.github/workflows/build-cross-compile.yml') }}
-
       - name: 'Install sysroot dependencies'
         run: sudo apt-get install debootstrap qemu-user-static
-        if: steps.get-cached-sysroot.outputs.cache-hit != 'true'
 
       - name: 'Create sysroot'
         id: create-sysroot
@@ -99,7 +91,6 @@ jobs:
           sysroot
           ${{ matrix.debian-repository }}
         continue-on-error: ${{ matrix.tolerate-sysroot-errors }}
-        if: steps.get-cached-sysroot.outputs.cache-hit != 'true'
 
       # - name: 'Prepare sysroot'
       #   run: |
@@ -127,28 +118,23 @@ jobs:
               gcc-${{ inputs.gcc-major-version }}-${{ matrix.gnu-arch }}-linux-gnu${{ matrix.gnu-abi}} \
               g++-${{ inputs.gcc-major-version }}-${{ matrix.gnu-arch }}-linux-gnu${{ matrix.gnu-abi}} \
               libxrandr-dev libxtst-dev libcups2-dev libasound2-dev
-
           # sudo dpkg --add-architecture armhf   # 若目标为 ARM 32 位（gnueabihf）
           # sudo apt-get update
           # sudo apt-get install libx11-dev:armhf libxext-dev:armhf libxrender-dev:armhf
           sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-${{ inputs.gcc-major-version }} 100 --slave /usr/bin/g++ g++ /usr/bin/g++-${{ inputs.gcc-major-version }}
 
 
-      - name: Update library cache
-        run: |
-          sudo ldconfig
-
 
       - name: 'Remove broken sysroot'
         run: |
           sudo rm -rf sysroot/
-        if: steps.create-sysroot.outcome != 'success' && steps.get-cached-sysroot.outputs.cache-hit != 'true'
+        if: steps.create-sysroot.outcome != 'success'
 
       - name: 'Configure'
         run: >
           bash configure
           --with-conf-name=linux-${{ matrix.target-cpu }}
-          --with-version-opt=${GITHUB_ACTOR}-${GITHUB_SHA}
+          --with-version-opt=hezhan-${GITHUB_SHA}
           --with-boot-jdk=${{ steps.bootjdk.outputs.path }}
           --with-gtest=${{ steps.gtest.outputs.path }}
           --with-zlib=bundled
@@ -157,16 +143,15 @@ jobs:
           --enable-cds
           --openjdk-target=${{ matrix.gnu-arch }}-linux-gnu${{ matrix.gnu-abi}}
           --with-sysroot=sysroot
-          --with-extra-cflags="-I/home/runner/work/dragonwell17/dragonwell17/sysroot/usr/include -I/home/runner/work/dragonwell17/dragonwell17/sysroot/usr/include"
-          --with-extra-cxxflags="-I/home/runner/work/dragonwell17/dragonwell17/sysroot/usr/include -I/home/runner/work/dragonwell17/dragonwell17/sysroot/usr/include"
-
+          --with-extra-cflags="-I/home/runner/work/dragonwell17/dragonwell17/sysroot/usr/include"
+          --with-extra-cxxflags="-I/home/runner/work/dragonwell17/dragonwell17/sysroot/usr/include"
           CC=${{ matrix.gnu-arch }}-linux-gnu${{ matrix.gnu-abi}}-gcc-${{ inputs.gcc-major-version }}
           CXX=${{ matrix.gnu-arch }}-linux-gnu${{ matrix.gnu-abi}}-g++-${{ inputs.gcc-major-version }}
           ${{ inputs.extra-conf-options }} ${{ inputs.configure-arguments }} || (
           echo "Dumping config.log:" &&
           cat config.log &&
           exit 1)
-        if: steps.create-sysroot.outcome == 'success' || steps.get-cached-sysroot.outputs.cache-hit == 'true'
+        if: steps.create-sysroot.outcome == 'success' 
 
 
       - name: 'Build'
@@ -175,7 +160,7 @@ jobs:
         with:
           make-target: 'jdk ${{ inputs.make-arguments }}'
           platform: linux-${{ matrix.target-cpu }}
-        if: steps.create-sysroot.outcome == 'success' || steps.get-cached-sysroot.outputs.cache-hit == 'true'
+        if: steps.create-sysroot.outcome == 'success'
 
       - name: 'Upload bundles'
         uses: ./.github/actions/upload-bundles
