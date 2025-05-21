@@ -61,25 +61,6 @@ jobs:
             gnu-abi: eabihf
 
     steps:
-        # Upgrading apt to solve libc6 installation bugs, see JDK-8260460.
-      - name: 'Install toolchain and dependencies'
-        run: |
-          # Install dependencies using apt-get
-          sudo apt-get update
-          sudo apt-get install --only-upgrade apt
-          sudo apt-get install \
-              gcc-${{ inputs.gcc-major-version }} \
-              g++-${{ inputs.gcc-major-version }} \
-              gcc-${{ inputs.gcc-major-version }}-${{ matrix.gnu-arch }}-linux-gnu${{ matrix.gnu-abi}} \
-              g++-${{ inputs.gcc-major-version }}-${{ matrix.gnu-arch }}-linux-gnu${{ matrix.gnu-abi}} \
-              libxrandr-dev libxtst-dev libcups2-dev libasound2-dev
-          sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-${{ inputs.gcc-major-version }} 100 --slave /usr/bin/g++ g++ /usr/bin/g++-${{ inputs.gcc-major-version }}
-          find /usr -name Xlib.h 
-
-      - name: Update library cache
-        run: |
-          sudo ldconfig
-
       - name: 'Checkout the JDK source'
         uses: actions/checkout@v4
 
@@ -134,6 +115,25 @@ jobs:
           rm -rf sysroot/lib/{udev,systemd}
         if: steps.create-sysroot.outcome == 'success' && steps.get-cached-sysroot.outputs.cache-hit != 'true'
 
+                # Upgrading apt to solve libc6 installation bugs, see JDK-8260460.
+      - name: 'Install toolchain and dependencies'
+        run: |
+          # Install dependencies using apt-get
+          sudo apt-get update
+          sudo apt-get install --only-upgrade apt
+          sudo apt-get install \
+              gcc-${{ inputs.gcc-major-version }} \
+              g++-${{ inputs.gcc-major-version }} \
+              gcc-${{ inputs.gcc-major-version }}-${{ matrix.gnu-arch }}-linux-gnu${{ matrix.gnu-abi}} \
+              g++-${{ inputs.gcc-major-version }}-${{ matrix.gnu-arch }}-linux-gnu${{ matrix.gnu-abi}} \
+              libxrandr-dev libxtst-dev libcups2-dev libasound2-dev
+          sudo apt-get install libx11-dev:armhf libxext-dev:armhf libxrender-dev:armhf
+          sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-${{ inputs.gcc-major-version }} 100 --slave /usr/bin/g++ g++ /usr/bin/g++-${{ inputs.gcc-major-version }}
+          find sysroot -name Xlib.h 
+
+      - name: Update library cache
+        run: |
+          sudo ldconfig
 
 
       - name: 'Remove broken sysroot'
