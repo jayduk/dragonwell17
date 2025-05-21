@@ -131,10 +131,9 @@ jobs:
           # sudo dpkg --add-architecture armhf   # 若目标为 ARM 32 位（gnueabihf）
           # sudo apt-get update
           # sudo apt-get install libx11-dev:armhf libxext-dev:armhf libxrender-dev:armhf
+          sudo apt install tree
           sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-${{ inputs.gcc-major-version }} 100 --slave /usr/bin/g++ g++ /usr/bin/g++-${{ inputs.gcc-major-version }}
-          sudo find sysroot -name Xlib.h 
-          export CFLAGS="--sysroot=$(pwd)/sysroot -I$(pwd)/sysroot/usr/include -I$(pwd)/sysroot/usr/include/X11"
-          export CPPFLAGS="$CFLAGS"
+          tree sysroot
 
 
       - name: Update library cache
@@ -160,8 +159,8 @@ jobs:
           --enable-cds
           --openjdk-target=${{ matrix.gnu-arch }}-linux-gnu${{ matrix.gnu-abi}}
           --with-sysroot=sysroot
-          --with-extra-cflags="--sysroot=$(pwd)/sysroot -I$(pwd)/sysroot/usr/include -I$(pwd)/sysroot/usr/include"
-          --with-extra-cxxflags="--sysroot=$(pwd)/sysroot -I$(pwd)/sysroot/usr/include -I$(pwd)/sysroot/usr/include"
+          --with-extra-cflags="-I/home/runner/work/dragonwell17/dragonwell17/sysroot/usr/include -I/home/runner/work/dragonwell17/dragonwell17/sysroot/usr/include"
+          --with-extra-cxxflags="-I/home/runner/work/dragonwell17/dragonwell17/sysroot/usr/include -I/home/runner/work/dragonwell17/dragonwell17/sysroot/usr/include"
 
           CC=${{ matrix.gnu-arch }}-linux-gnu${{ matrix.gnu-abi}}-gcc-${{ inputs.gcc-major-version }}
           CXX=${{ matrix.gnu-arch }}-linux-gnu${{ matrix.gnu-abi}}-g++-${{ inputs.gcc-major-version }}
