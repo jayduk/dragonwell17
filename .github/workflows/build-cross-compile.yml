@@ -157,6 +157,7 @@ jobs:
           --enable-cds
           --openjdk-target=${{ matrix.gnu-arch }}-linux-gnu${{ matrix.gnu-abi}}
           --with-sysroot=sysroot
+          --with-extra-cflags="-isystem sysroot/usr/include -isystem sysroot/usr/include/X11"
           CC=${{ matrix.gnu-arch }}-linux-gnu${{ matrix.gnu-abi}}-gcc-${{ inputs.gcc-major-version }}
           CXX=${{ matrix.gnu-arch }}-linux-gnu${{ matrix.gnu-abi}}-g++-${{ inputs.gcc-major-version }}
           ${{ inputs.extra-conf-options }} ${{ inputs.configure-arguments }} || (
