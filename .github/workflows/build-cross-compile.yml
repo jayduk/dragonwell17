@@ -132,7 +132,7 @@ jobs:
           # sudo apt-get update
           # sudo apt-get install libx11-dev:armhf libxext-dev:armhf libxrender-dev:armhf
           sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-${{ inputs.gcc-major-version }} 100 --slave /usr/bin/g++ g++ /usr/bin/g++-${{ inputs.gcc-major-version }}
-          find sysroot -name Xlib.h 
+          sudo find sysroot -name Xlib.h 
 
       - name: Update library cache
         run: |
