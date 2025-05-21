@@ -101,19 +101,19 @@ jobs:
         continue-on-error: ${{ matrix.tolerate-sysroot-errors }}
         if: steps.get-cached-sysroot.outputs.cache-hit != 'true'
 
-      - name: 'Prepare sysroot'
-        run: |
-          # Prepare sysroot and remove unused files to minimize cache
-          sudo chroot sysroot symlinks -cr .
-          sudo chown ${USER} -R sysroot
-          rm -rf sysroot/{dev,proc,run,sys,var}
-          rm -rf sysroot/usr/{sbin,bin,share}
-          rm -rf sysroot/usr/lib/{apt,gcc,udev,systemd}
-          rm -rf sysroot/usr/libexec/gcc
-          # /{bin,sbin,lib}/ are not symbolic links to /usr/{bin,sbin,lib}/ when debootstrap with --no-merged-usr
-          rm -rf sysroot/{sbin,bin}
-          rm -rf sysroot/lib/{udev,systemd}
-        if: steps.create-sysroot.outcome == 'success' && steps.get-cached-sysroot.outputs.cache-hit != 'true'
+      # - name: 'Prepare sysroot'
+      #   run: |
+      #     # Prepare sysroot and remove unused files to minimize cache
+      #     sudo chroot sysroot symlinks -cr .
+      #     sudo chown ${USER} -R sysroot
+      #     rm -rf sysroot/{dev,proc,run,sys,var}
+      #     rm -rf sysroot/usr/{sbin,bin,share}
+      #     rm -rf sysroot/usr/lib/{apt,gcc,udev,systemd}
+      #     rm -rf sysroot/usr/libexec/gcc
+      #     # /{bin,sbin,lib}/ are not symbolic links to /usr/{bin,sbin,lib}/ when debootstrap with --no-merged-usr
+      #     rm -rf sysroot/{sbin,bin}
+      #     rm -rf sysroot/lib/{udev,systemd}
+      #   if: steps.create-sysroot.outcome == 'success' && steps.get-cached-sysroot.outputs.cache-hit != 'true'
 
                 # Upgrading apt to solve libc6 installation bugs, see JDK-8260460.
       - name: 'Install toolchain and dependencies'
@@ -127,10 +127,10 @@ jobs:
               gcc-${{ inputs.gcc-major-version }}-${{ matrix.gnu-arch }}-linux-gnu${{ matrix.gnu-abi}} \
               g++-${{ inputs.gcc-major-version }}-${{ matrix.gnu-arch }}-linux-gnu${{ matrix.gnu-abi}} \
               libxrandr-dev libxtst-dev libcups2-dev libasound2-dev
-              
-          sudo dpkg --add-architecture armhf   # 若目标为 ARM 32 位（gnueabihf）
-          sudo apt-get update
-          sudo apt-get install libx11-dev:armhf libxext-dev:armhf libxrender-dev:armhf
+
+          # sudo dpkg --add-architecture armhf   # 若目标为 ARM 32 位（gnueabihf）
+          # sudo apt-get update
+          # sudo apt-get install libx11-dev:armhf libxext-dev:armhf libxrender-dev:armhf
           sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-${{ inputs.gcc-major-version }} 100 --slave /usr/bin/g++ g++ /usr/bin/g++-${{ inputs.gcc-major-version }}
           find sysroot -name Xlib.h 
 
