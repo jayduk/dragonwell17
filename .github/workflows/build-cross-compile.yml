@@ -131,9 +131,7 @@ jobs:
           # sudo dpkg --add-architecture armhf   # 若目标为 ARM 32 位（gnueabihf）
           # sudo apt-get update
           # sudo apt-get install libx11-dev:armhf libxext-dev:armhf libxrender-dev:armhf
-          sudo apt install tree
           sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-${{ inputs.gcc-major-version }} 100 --slave /usr/bin/g++ g++ /usr/bin/g++-${{ inputs.gcc-major-version }}
-          tree sysroot
 
 
       - name: Update library cache
