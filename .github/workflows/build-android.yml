@@ -81,6 +81,7 @@ jobs:
           --with-conf-name=linux-arm \
           --openjdk-target=arm-linux-gnueabihf \
           --with-sysroot=$SYSROOT \
+          --with-toolchain-type=clang \     
           --with-toolchain-path=$TOOLCHAIN/bin \
           --with-extra-cflags="-D__ANDROID_API__=$API" \
           --with-extra-ldflags="-landroid -llog" \
