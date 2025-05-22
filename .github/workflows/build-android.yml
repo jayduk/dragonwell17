@@ -94,8 +94,7 @@ jobs:
           --with-gtest=${{ steps.gtest.outputs.path }} \
           --disable-precompiled-headers \
           --enable-debug \
-          --enable-cds \
-          --disable-headful \    
+          --enable-cds \ 
           --disable-awt \     
           --disable-javafx \    
           --disable-x11 \      
