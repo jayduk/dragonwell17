@@ -52,7 +52,7 @@ jobs:
       - name: 'Install ndk dependencies'
         run: |
           wget https://dl.google.com/android/repository/android-ndk-r25b-linux.zip
-          unzip android-ndk-r25b-linux.zip -d ~/android-ndk
+          unzip android-ndk-r25b-linux.zip -d android-ndk
 
       - name: 'Install toolchain and dependencies'
         run: |
@@ -81,12 +81,12 @@ jobs:
           --with-conf-name=linux-arm \
           --openjdk-target=arm-linux-gnueabihf \
           --with-sysroot=$SYSROOT \
-          --with-toolchain-type=clang \     
           --with-toolchain-path=$TOOLCHAIN/bin \
           --with-extra-cflags="-D__ANDROID_API__=$API" \
           --with-extra-ldflags="-landroid -llog" \
           --disable-warnings-as-errors \
           --with-jvm-variants=server \
+          --with-tools-dir=$TOOLCHAIN \
           --with-version-opt=hezhan-${GITHUB_SHA} \
           --with-boot-jdk=${{ steps.bootjdk.outputs.path }} \
           --with-gtest=${{ steps.gtest.outputs.path }} \
