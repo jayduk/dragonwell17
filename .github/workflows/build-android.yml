@@ -79,7 +79,7 @@ jobs:
           
           bash configure \
           --with-conf-name=linux-arm \
-          --openjdk-target=$TARGET \
+          --openjdk-target=arm-linux-gnueabihf \
           --with-sysroot=$SYSROOT \
           --with-toolchain-path=$TOOLCHAIN/bin \
           --with-extra-cflags="-D__ANDROID_API__=$API" \
@@ -95,7 +95,7 @@ jobs:
           --disable-awt \     
           --disable-javafx \    
           --disable-x11 \      
-          --with-x=no         
+          --with-x=no
 
       - name: 'Build'
         run: make LOG=info
