@@ -1,0 +1,119 @@
+#
+# Copyright (c) 2022, Oracle and/or its affiliates. All rights reserved.
+# DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
+#
+# This code is free software; you can redistribute it and/or modify it
+# under the terms of the GNU General Public License version 2 only, as
+# published by the Free Software Foundation.  Oracle designates this
+# particular file as subject to the "Classpath" exception as provided
+# by Oracle in the LICENSE file that accompanied this code.
+#
+# This code is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+# FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+# version 2 for more details (a copy is included in the LICENSE file that
+# accompanied this code).
+#
+# You should have received a copy of the GNU General Public License version
+# 2 along with this work; if not, write to the Free Software Foundation,
+# Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
+#
+# Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+# or visit www.oracle.com if you need additional information or have any
+# questions.
+#
+
+name: 'Build (android)'
+
+on:
+  workflow_dispatch:
+    inputs:
+      platforms:
+        description: 'without meaning'
+        required: true
+        default: 'linux-cross-compile'
+
+jobs:
+  build-android-compile:
+    name: build
+    runs-on: ubuntu-22.04
+
+    strategy:
+      fail-fast: false
+
+    steps:
+      - name: 'Checkout the JDK source'
+        uses: actions/checkout@v4
+
+      - name: 'Get the BootJDK'
+        id: bootjdk
+        uses: ./.github/actions/get-bootjdk
+        with:
+          platform: linux-x64
+
+      - name: 'Get GTest'
+        id: gtest
+        uses: ./.github/actions/get-gtest
+
+      - name: 'Install ndk dependencies'
+        run: |
+          wget https://dl.google.com/android/respository/android-ndk-r25b-linux.zip
+          unzip android-ndk-r25b-linux.zip -d android-ndk
+
+      - name: 'Install toolchain and dependencies'
+        run: |
+          # Install dependencies using apt-get
+          sudo apt-get update
+          sudo apt-get install --only-upgrade apt
+          sudo apt-get install \
+              gcc-${{ inputs.gcc-major-version }} \
+              g++-${{ inputs.gcc-major-version }} \
+              gcc-${{ inputs.gcc-major-version }}-${{ matrix.gnu-arch }}-linux-gnu${{ matrix.gnu-abi}} \
+              g++-${{ inputs.gcc-major-version }}-${{ matrix.gnu-arch }}-linux-gnu${{ matrix.gnu-abi}} \
+              libxrandr-dev libxtst-dev libcups2-dev libasound2-dev
+          sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-${{ inputs.gcc-major-version }} 100 --slave /usr/bin/g++ g++ /usr/bin/g++-${{ inputs.gcc-major-version }}
+
+      - name: 'Export env'
+        run: |
+          export NDK=~/android-ndk/android-ndk-r25b
+          export TOOLCHAIN=$NDK/toolchains/llvm/prebuilt/linux-x86_64
+          export TARGET=armv7a-linux-androideabi
+          export API=29  # 根据设备安卓版本调整（建议≥24）
+          
+          # 设置编译器和 Sysroot
+          export CC=$TOOLCHAIN/bin/${TARGET}${API}-clang
+          export CXX=$TOOLCHAIN/bin/${TARGET}${API}-clang++
+          export SYSROOT=$TOOLCHAIN/sysroot
+        
+      - name: "Configure with out x11"
+        run: |
+          bash configure \
+          --with-conf-name=linux-arm \
+          --openjdk-target=$TARGET \
+          --with-sysroot=$SYSROOT \
+          --with-toolchain-path=$TOOLCHAIN/bin \
+          --with-extra-cflags="-D__ANDROID_API__=$API" \
+          --with-extra-ldflags="-landroid -llog" \
+          --disable-warnings-as-errors \
+          --with-jvm-variants=server \
+          --with-version-opt=hezhan-${GITHUB_SHA} \
+          --with-boot-jdk=${{ steps.bootjdk.outputs.path }} \
+          --with-gtest=${{ steps.gtest.outputs.path }} \
+          --disable-precompiled-headers \
+          --enable-debug \
+          --enable-cds \
+          --disable-headful \    
+          --disable-awt \     
+          --disable-javafx \    
+          --disable-x11 \      
+          --with-x=no         
+
+      - name: 'Build'
+        run: make LOG=info
+
+      - name: 'Upload test results'
+        uses: actions/upload-artifact@v4
+        with:
+          path: build
+          name: build.zip
+        if: always()
