@@ -65,21 +65,18 @@ jobs:
               make \
               libxrandr-dev libxtst-dev libcups2-dev libasound2-dev
           sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-10 100 --slave /usr/bin/g++ g++ /usr/bin/g++-10
-
-      - name: 'Export env'
+        
+      - name: "Configure with out x11"
         run: |
           export NDK=~/android-ndk/android-ndk-r25b
           export TOOLCHAIN=$NDK/toolchains/llvm/prebuilt/linux-x86_64
           export TARGET=armv7a-linux-androideabi
           export API=29  # 根据设备安卓版本调整（建议≥24）
-          
           # 设置编译器和 Sysroot
           export CC=$TOOLCHAIN/bin/${TARGET}${API}-clang
           export CXX=$TOOLCHAIN/bin/${TARGET}${API}-clang++
           export SYSROOT=$TOOLCHAIN/sysroot
-        
-      - name: "Configure with out x11"
-        run: |
+          
           bash configure \
           --with-conf-name=linux-arm \
           --openjdk-target=$TARGET \
