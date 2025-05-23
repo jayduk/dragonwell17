@@ -70,7 +70,9 @@ jobs:
           export CC=$TOOLCHAIN/bin/${TARGET}${API}-clang
           export CXX=$TOOLCHAIN/bin/${TARGET}${API}-clang++
           export SYSROOT=$TOOLCHAIN/sysroot
-          
+          export cc=$TOOLCHAIN/bin/${TARGET}${API}-clang
+          export cxx=$TOOLCHAIN/bin/${TARGET}${API}-clang++
+
           bash configure \
           --with-conf-name=$TARGET \
           --openjdk-target=$TARGET \
