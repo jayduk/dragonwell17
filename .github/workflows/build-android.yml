@@ -59,12 +59,7 @@ jobs:
           # Install dependencies using apt-get
           sudo apt-get update
           sudo apt-get install --only-upgrade apt
-          sudo apt-get install \
-              gcc-10 \
-              g++-10 \
-              make \
-              libxrandr-dev libxtst-dev libcups2-dev libasound2-dev
-          sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-10 100 --slave /usr/bin/g++ g++ /usr/bin/g++-10
+          sudo apt-get install clang
         
       - name: "Configure with out x11"
         run: |
@@ -72,30 +67,26 @@ jobs:
           export TOOLCHAIN=$NDK/toolchains/llvm/prebuilt/linux-x86_64
           export TARGET=armv7a-linux-androideabi
           export API=29  # 根据设备安卓版本调整（建议≥24）
-          # 设置编译器和 Sysroot
           export CC=$TOOLCHAIN/bin/${TARGET}${API}-clang
           export CXX=$TOOLCHAIN/bin/${TARGET}${API}-clang++
           export SYSROOT=$TOOLCHAIN/sysroot
           
           bash configure \
-          --with-conf-name=linux-arm \
-          --openjdk-target=arm-linux-gnueabihf \
+          --with-conf-name=$TARGET \
+          --openjdk-target=$TARGET \
           --with-sysroot=$SYSROOT \
           --with-toolchain-path=$TOOLCHAIN/bin \
           --with-extra-cflags="-D__ANDROID_API__=$API" \
           --with-extra-ldflags="-landroid -llog" \
           --disable-warnings-as-errors \
-          --with-jvm-variants=server \
+          --with-jvm-variants=client \
           --with-tools-dir=$TOOLCHAIN \
           --with-version-opt=hezhan-${GITHUB_SHA} \
           --with-boot-jdk=${{ steps.bootjdk.outputs.path }} \
           --with-gtest=${{ steps.gtest.outputs.path }} \
           --disable-precompiled-headers \
           --enable-debug \
-          --enable-cds \ 
-          --disable-awt \     
-          --disable-javafx \    
-          --disable-x11 \      
+          --enable-cds \
           --with-x=no
 
       - name: 'Build'
