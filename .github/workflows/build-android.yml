@@ -81,6 +81,7 @@ jobs:
           --disable-warnings-as-errors \
           --with-jvm-variants=client \
           --with-tools-dir=$TOOLCHAIN \
+          --with-toolchain-type=clang \
           --with-version-opt=hezhan-${GITHUB_SHA} \
           --with-boot-jdk=${{ steps.bootjdk.outputs.path }} \
           --with-gtest=${{ steps.gtest.outputs.path }} \
